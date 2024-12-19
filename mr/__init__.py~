@@ -1,0 +1,7 @@
+import quart
+
+def create_app():
+    app = quart.Quart(__name__)
+    @app.route("/")
+    async def index():
+        return "Hello, World!"
