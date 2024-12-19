@@ -17,13 +17,13 @@ async def index():
     return "TODO: Render index.html"
 
 def get_article_path(topic: str, article: str) -> str:
-    return DIRECTORY / topic / article
+    return DIRECTORY / topic / f"{article}.md"
 
-def get_etag(filepath: Path, *, abort: bool = False):
+def get_etag(filepath: Path, *, aborted: bool = False):
     try:
         stat = os.stat(filepath)
     except FileNotFoundError:
-        return abort(404) if abort else None
+        return abort(404) if aborted else None
     return hex(stat.st_mtime_ns)
 
 def assert_etag(etag: str):
@@ -33,7 +33,7 @@ def assert_etag(etag: str):
 @app.route("/<topic>/<article>", methods=["PUT", "GET"])
 async def article(topic: str, article: str):
     filepath = get_article_path(topic, article)
-    etag = get_etag(filepath, abort=request.method == "GET")
+    etag = get_etag(filepath, aborted=(request.method == "GET"))
     assert_etag(etag)
     mode = "r" if request.method == "GET" else "w"
     if etag is None and not filepath.parent.exists():
@@ -51,8 +51,6 @@ async def editor(topic: str, article: str):
     with open(get_article_path(topic, article), "r") as fp:
         content = fp.read()
     return await render_template("editor.html", content=content)
-    
-        
     
     
 
